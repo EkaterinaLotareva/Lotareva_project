@@ -41,10 +41,12 @@ while not finished:
             event_y = event.pos[1]    
             if ((x-event_x)**2 + (y-event_y)**2)**0.5 <= r:
                 s+=1            
-            
-    new_ball()
+
+    for i in range(randint(1,10)):                
+        new_ball()
+    
     pygame.display.update()
     screen.fill(BLACK)
 
-pygame.quit()
 print(s , 'очков')
+pygame.quit()   
