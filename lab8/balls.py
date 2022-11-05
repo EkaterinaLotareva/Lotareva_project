@@ -4,7 +4,7 @@ from random import randint
 pygame.init()
 
 FPS = 2
-screen = pygame.display.set_mode((1200, 900))
+screen = pygame.display.set_mode((1200, 600))
 
 RED = (255, 0, 0)
 BLUE = (0, 0, 255)
@@ -20,13 +20,12 @@ def new_ball():
     
     '''рисует новый шарик '''
     x = randint(100, 1100)
-    y = randint(100, 900)
+    y = randint(100, 500)
     r = randint(10, 100)
     color = COLORS[randint(0, 5)]
     circle(screen, color, (x, y), r)
 
-def click(event):
-    print(x, y, r)    
+s=0
 
 pygame.display.update()
 clock = pygame.time.Clock()
@@ -38,11 +37,14 @@ while not finished:
         if event.type == pygame.QUIT:
             finished = True
         elif event.type == pygame.MOUSEBUTTONDOWN:
-            print('Click!')
+            event_x = event.pos[0]
+            event_y = event.pos[1]    
+            if ((x-event_x)**2 + (y-event_y)**2)**0.5 <= r:
+                s+=1            
             
     new_ball()
-    click(event)
     pygame.display.update()
     screen.fill(BLACK)
 
 pygame.quit()
+print(s , 'очков')
