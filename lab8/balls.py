@@ -3,10 +3,12 @@ from pygame.draw import*
 import random
 
 pygame.init()
+pygame.font.init()
 
 FPS = 30
 screen = pygame.display.set_mode((1200, 600))
-
+font = pygame.font.SysFont(None, 60)
+text_color = (255, 255, 255)
 
 RED = (255, 0, 0)
 BLUE = (0, 0, 255)
@@ -18,6 +20,7 @@ BLACK = (0, 0, 0)
 COLORS = [RED, BLUE, YELLOW, GREEN, MAGENTA, CYAN]
 
 number_of_balls = 10
+s=0
 
 x = [None] * number_of_balls
 y = [None] * number_of_balls
@@ -33,17 +36,18 @@ def new_ball():
         x[i] = random.randint(100, 1100)
         y[i] = random.randint(100, 500)
         r[i] = random.randint(10, 100)
-        V_x[i] = random.randint(1, 10)
-        V_y[i] = random.randint(1, 10)
+        V_x[i] = random.randint(5, 20)
+        V_y[i] = random.randint(5, 20)
         color[i] = COLORS[random.randint(0, 5)]
 
 def draw_balls():
-    global x, y, r, V_x, V_y
+    global x, y, r, V_x, V_y, s
     '''рисует шарики '''
     screen.fill(BLACK)
     for i in range(number_of_balls):
         circle(screen, color[i], (x[i], y[i]), r[i])
-s = 0
+    text = font.render('Очки: ' + str(s), False, text_color)
+    screen.blit(text, (0, 0))
 
 def click(event):
     '''проверяет, есть ли попадание'''
