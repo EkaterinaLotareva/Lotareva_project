@@ -1,4 +1,5 @@
 import math
+import random
 from random import choice
 
 import pygame
@@ -95,8 +96,13 @@ class Ball:
         Returns:
             Возвращает True в случае столкновения мяча и цели. В противном случае возвращает False.
         """
-        # FIXME
-        return False
+        a = obj.x - self.x
+        b = obj.y - self.y
+        if ((b**2 + a**2) <= (self.r + target.r)**2) :
+            return True
+        else:
+            return False
+
 
 
 
@@ -112,7 +118,7 @@ class Gun:
         self.y = 500
         self.l = 10
 
-    def fire2_start(self, event):
+    def fire2_start(self):
         self.f2_on = 1
 
     def fire2_end(self, event):
@@ -136,7 +142,11 @@ class Gun:
 
     def targetting(self, event):
         """Прицеливание. Зависит от положения мыши."""
-        self.an = math.atan((event.pos[1]-450) / (event.pos[0]-20))
+        y = event.pos[1]
+        x = event.pos[0]
+        if x - 20 <= 0:
+            x = 20.00000000000001
+        self.an = math.atan((y-450) / (x-20))
         if self.f2_on:
             self.color = RED
         else:
@@ -147,10 +157,10 @@ class Gun:
 
         coss = math.cos(self.an)
         sinn = math.sin(self.an)
-        if math.cos(self.an) <= 0:
-            coss = 0
+
         if math.sin(self.an) >= 0:
             sinn = 0
+            coss = 1
 
         line(screen, self.color, (self.x, self.y), (self.x + len * coss, self.y + len * sinn), 7)
 
@@ -164,24 +174,29 @@ class Gun:
 
 
 class Target:
-    # self.points = 0
-    # self.live = 1
-    # FIXME: don't work!!! How to call this functions when object is created?
-    # self.new_target()
+
+    def __init__(self, screen):
+        self.screen = screen
+        self.r = random.randint(10, 100)
+        self.color = choice(GAME_COLORS)
+        self.x = random.randint(400, 700)
+        self.y = random.randint(200, 400)
+        self.live = 1
+        self.points = 0
 
     def new_target(self):
-        """ Инициализация новой цели. """
-        x = self.x = rnd(600, 780)
-        y = self.y = rnd(300, 550)
-        r = self.r = rnd(2, 50)
-        color = self.color = RED
-
-    def hit(self, points=1):
-        """Попадание шарика в цель."""
-        self.points += points
+        self.r = random.randint(10, 100)
+        self.color = choice(GAME_COLORS)
+        self.x = random.randint(400, 700)
+        self.y = random.randint(200, 400)
+        self.live = 1
 
     def draw(self):
-        ...
+        circle(self.screen, self.color, (self.x, self.y), self.r)
+
+    def hit(self):
+        """Попадание шарика в цель."""
+        self.points += 1
 
 
 pygame.init()
@@ -194,7 +209,7 @@ screen = pygame.display.set_mode((WIDTH, HEIGHT))
 
 clock = pygame.time.Clock()
 gun = Gun(screen)
-target = Target()
+target = Target(screen)
 floor = Floor(screen)
 finished = False
 
@@ -212,7 +227,7 @@ while not finished:
         if event.type == pygame.QUIT:
             finished = True
         elif (event.type == pygame.MOUSEBUTTONDOWN) and (event.button == 1):
-            gun.fire2_start(event)
+            gun.fire2_start()
         elif (event.type == pygame.MOUSEBUTTONUP) and (event.button == 1):
             gun.fire2_end(event)
         elif event.type == pygame.MOUSEMOTION:
