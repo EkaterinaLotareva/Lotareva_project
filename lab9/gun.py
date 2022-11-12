@@ -74,6 +74,11 @@ class Ball:
         if self.x > WIDTH - self.r:
             self.vx = -self.vx
 
+        if self.y == floor.height - self.r:
+            self.live -= 1
+        if self.live == 0:
+            self.color = WHITE
+
     def draw(self):
         pygame.draw.circle(
             self.screen,
@@ -92,6 +97,8 @@ class Ball:
         """
         # FIXME
         return False
+
+
 
 
 class Gun:
@@ -121,7 +128,7 @@ class Gun:
         new_ball = Ball(self.screen)
         new_ball.vx = self.f2_power * math.cos(self.an)
         new_ball.vy = - self.f2_power * math.sin(self.an)
-        new_ball.x =  self.x
+        new_ball.x = self.x
         new_ball.y = self.y
         self.f2_on = 0
         self.f2_power = 10
