@@ -20,7 +20,7 @@ GAME_COLORS = [RED, BLUE, YELLOW, GREEN, MAGENTA, CYAN]
 
 WIDTH = 800
 HEIGHT = 600
-
+grav = 3
 
 
 class Ball:
@@ -50,6 +50,8 @@ class Ball:
         # FIXME
         self.x += self.vx
         self.y -= self.vy
+        self.vy -= grav
+
 
     def draw(self):
         pygame.draw.circle(
@@ -105,8 +107,7 @@ class Gun:
 
     def targetting(self, event):
         """Прицеливание. Зависит от положения мыши."""
-        if event:
-            self.an = math.atan((event.pos[1]-450) / (event.pos[0]-20))
+        self.an = math.atan((event.pos[1]-450) / (event.pos[0]-20))
         if self.f2_on:
             self.color = RED
         else:
@@ -168,9 +169,9 @@ while not finished:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             finished = True
-        elif event.type == pygame.MOUSEBUTTONDOWN:
+        elif (event.type == pygame.MOUSEBUTTONDOWN) and (event.button == 1):
             gun.fire2_start(event)
-        elif event.type == pygame.MOUSEBUTTONUP:
+        elif (event.type == pygame.MOUSEBUTTONUP) and (event.button == 1):
             gun.fire2_end(event)
         elif event.type == pygame.MOUSEMOTION:
             gun.targetting(event)
