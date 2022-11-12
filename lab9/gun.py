@@ -22,6 +22,16 @@ WIDTH = 800
 HEIGHT = 600
 grav = 3
 
+class Floor:
+    def __init__(self, screen):
+        """рисует пол"""
+        global HEIGHT
+        self.screen = screen
+        self.height = HEIGHT - 80
+
+    def draw(self):
+        pygame.draw.line(self.screen, BLACK, (0, self.height), (WIDTH, self.height), 1)
+
 
 class Ball:
     def __init__(self, screen):
@@ -47,11 +57,22 @@ class Ball:
         self.x и self.y с учетом скоростей self.vx и self.vy, силы гравитации, действующей на мяч,
         и стен по краям окна (размер окна 800х600).
         """
-        # FIXME
+        global HEIGHT
+
         self.x += self.vx
         self.y -= self.vy
         self.vy -= grav
 
+        if self.y > -self.r + floor.height:
+            self.vy = -self.vy * 0.5
+            self.vx = self.vx * 0.6
+            if self.y > -self.r + floor.height:
+                self.y = -self.r + floor.height
+            if self.vy < 5:
+                self.vy = 0
+
+        if self.x > WIDTH - self.r:
+            self.vx = -self.vx
 
     def draw(self):
         pygame.draw.circle(
@@ -95,6 +116,7 @@ class Gun:
         """
         global balls, bullet, len
         bullet += 1
+
         self.an = math.atan2((event.pos[1]-self.y), (event.pos[0]-self.x))
         new_ball = Ball(self.screen)
         new_ball.vx = self.f2_power * math.cos(self.an)
@@ -115,7 +137,15 @@ class Gun:
 
     def draw(self):
         len = 20 + self.f2_power
-        line(screen, self.color, (self.x, self.y), (self.x + len* math.cos(self.an), self.y + len * math.sin(self.an)), 7)
+
+        coss = math.cos(self.an)
+        sinn = math.sin(self.an)
+        if math.cos(self.an) <= 0:
+            coss = 0
+        if math.sin(self.an) >= 0:
+            sinn = 0
+
+        line(screen, self.color, (self.x, self.y), (self.x + len * coss, self.y + len * sinn), 7)
 
     def power_up(self):
         if self.f2_on:
@@ -148,17 +178,22 @@ class Target:
 
 
 pygame.init()
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
 bullet = 0
 balls = []
+
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+
+
 
 clock = pygame.time.Clock()
 gun = Gun(screen)
 target = Target()
+floor = Floor(screen)
 finished = False
 
 while not finished:
     screen.fill(WHITE)
+    floor.draw()
     gun.draw()
     target.draw()
     for b in balls:
