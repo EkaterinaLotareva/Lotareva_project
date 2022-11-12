@@ -17,6 +17,7 @@ CYAN = 0x00FFCC
 BLACK = (0, 0, 0)
 WHITE = 0xFFFFFF
 GREY = 0x7D7D7D
+ORANGE = (255, 100, 0)
 GAME_COLORS = [RED, BLUE, YELLOW, GREEN, MAGENTA, CYAN]
 
 WIDTH = 800
@@ -148,9 +149,9 @@ class Gun:
             x = 20.00000000000001
         self.an = math.atan((y-450) / (x-20))
         if self.f2_on:
-            self.color = RED
+            self.color = ORANGE
         else:
-            self.color = GREY
+            self.color = BLACK
 
     def draw(self):
         len = 20 + self.f2_power
@@ -168,9 +169,9 @@ class Gun:
         if self.f2_on:
             if self.f2_power < 100:
                 self.f2_power += 1
-            self.color = RED
+            self.color = ORANGE
         else:
-            self.color = GREY
+            self.color = BLACK
 
 
 class Target:
@@ -199,18 +200,25 @@ class Target:
         self.points += 1
 
 
+class Text:
+    def write():
+        text = font.render('Очки: ' + str(target.points), False, BLACK)
+        screen.blit(text, (0, 0))
+
+
 pygame.init()
+pygame.font.init()
 bullet = 0
 balls = []
 
+font = pygame.font.SysFont(None, 60)
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
-
-
 
 clock = pygame.time.Clock()
 gun = Gun(screen)
 target = Target(screen)
 floor = Floor(screen)
+text = Text
 finished = False
 
 while not finished:
@@ -218,6 +226,7 @@ while not finished:
     floor.draw()
     gun.draw()
     target.draw()
+    text.write()
     for b in balls:
         b.draw()
     pygame.display.update()
