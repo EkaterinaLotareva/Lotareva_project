@@ -50,7 +50,7 @@ class Ball:
         self.vx = 0
         self.vy = 0
         self.color = choice(GAME_COLORS)
-        self.live = 30
+        self.live = 10
 
     def move(self):
         """Переместить мяч по прошествии единицы времени.
@@ -59,7 +59,7 @@ class Ball:
         self.x и self.y с учетом скоростей self.vx и self.vy, силы гравитации, действующей на мяч,
         и стен по краям окна (размер окна 800х600).
         """
-        global HEIGHT
+        global HEIGHT, balls
 
         self.x += self.vx
         self.y -= self.vy
@@ -78,8 +78,10 @@ class Ball:
 
         if self.y == floor.height - self.r:
             self.live -= 1
-        if self.live == 0:
-            self.color = WHITE
+
+        for b in balls:
+            if self.live == 0:
+                balls.remove(b)
 
     def draw(self):
         """рисует шарик"""
@@ -141,7 +143,6 @@ class Gun:
         self.f2_on = 0
         self.f2_power = 10
         balls.append(new_ball)
-        shoots += 1
 
     def targetting(self, event):
         """Прицеливание. Зависит от положения мыши."""
@@ -186,8 +187,8 @@ class Target:
         self.color = choice(GAME_COLORS)
         self.x = random.randint(400, 700)
         self.y = random.randint(200, 400)
-        self.vx = random.randint(-50, 50)
-        self.vy = random.randint(-50, 50)
+        self.vx = random.randint(-5, 5)
+        self.vy = random.randint(-5, 5)
         self.live = 1
         self.points = 0
 
@@ -199,8 +200,8 @@ class Target:
         self.color = choice(GAME_COLORS)
         self.x = random.randint(400, 700)
         self.y = random.randint(200, 400)
-        self.vx = random.randint(-20,20)
-        self.vy = random.randint(-20,20)
+        self.vx = random.randint(-5,5)
+        self.vy = random.randint(-5,5)
         self.live = 1
 
     def draw(self):
@@ -224,51 +225,44 @@ class Target:
 
 class Text:
 
-    def __init__(self):
-        self.live = 0
-
     def write_points(self):
         text_p = font.render('Oчки: ' + str(target.points), False, BLACK)
         screen.blit(text_p, (10, 10))
-
-    #def write_shoots(self):
-     #   global shoots
-      #  text_s = font.render('Вы уничтожили цель за ' + str(shoots) + ' выстрела(-ов)', False, BLACK)
-       # screen.blit(text_s, (10, 50))
-
-
 
 
 pygame.init()
 pygame.font.init()
 bullet = 0
-shoots = 1
 balls = []
+targets = []
+targets_number = 3
 
 font = pygame.font.SysFont(None, 40)
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 
 clock = pygame.time.Clock()
 gun = Gun(screen)
-target = Target(screen)
 floor = Floor(screen)
 text = Text()
 finished = False
+
+for i in range(targets_number):
+    target = Target(screen)
+    targets.append(target)
 
 while not finished:
     screen.fill(WHITE)
     floor.draw()
     gun.draw()
-    target.draw()
     text.write_points()
-    text.live -= 1
-    target.move()
-
-    #if text.live >= 0:
-        #text.write_shoots()
 
     for b in balls:
         b.draw()
+    pygame.display.update()
+
+    for t in targets:
+        t.draw()
+        t.move()
     pygame.display.update()
 
     clock.tick(FPS)
@@ -284,12 +278,11 @@ while not finished:
 
     for b in balls:
         b.move()
-        if b.hittest(target) and target.live:
-            target.live = 0
-            target.hit()
-            #text.write_shoots()
-            text.live = 60
-            target.new_target()
+        for t in targets:
+            if b.hittest(t) and t.live:
+                t.live = 0
+                t.hit()
+                t.new_target()
     gun.power_up()
 
 pygame.quit()
