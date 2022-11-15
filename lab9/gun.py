@@ -26,22 +26,22 @@ grav = 3
 
 class Floor:
     def __init__(self, screen):
-        """рисует пол"""
+        """создает пол"""
         global HEIGHT
         self.screen = screen
         self.height = HEIGHT - 80
 
     def draw(self):
+        """рисует пол"""
         pygame.draw.line(self.screen, BLACK, (0, self.height), (WIDTH, self.height), 1)
 
 
 class Ball:
     def __init__(self, screen):
-        """ Конструктор класса ball
-
-        Args:
-        x - начальное положение мяча по горизонтали
-        y - начальное положение мяча по вертикали
+        """
+        создает шарик.
+        х,у - координаты центра шарика,
+        vx, vy - скорости шарика по соответствующим осям
         """
         self.screen = screen
         self.x = 40
@@ -53,11 +53,9 @@ class Ball:
         self.live = 10
 
     def move(self):
-        """Переместить мяч по прошествии единицы времени.
-
-        Метод описывает перемещение мяча за один кадр перерисовки. То есть, обновляет значения
-        self.x и self.y с учетом скоростей self.vx и self.vy, силы гравитации, действующей на мяч,
-        и стен по краям окна (размер окна 800х600).
+        """
+        движение шарика.
+        реализована гравитация, отскок о пола и правой стены
         """
         global HEIGHT, balls
 
@@ -104,6 +102,7 @@ class Ball:
 
 class Gun:
     def __init__(self, screen):
+        """создает пушку. f2_power - сила выстрела, l - длина"""
         self.screen = screen
         self.f2_power = 10
         self.f2_on = 0
@@ -114,11 +113,12 @@ class Gun:
         self.l = 10
 
     def fire2_start(self):
+        """обозначает начало выстрела"""
         self.f2_on = 1
 
     def fire2_end(self, event):
-        """Выстрел мячом.
-
+        """
+        Выстрел мячом.
         Происходит при отпускании кнопки мыши.
         Начальные значения компонент скорости мяча vx и vy зависят от положения мыши.
         """
@@ -175,6 +175,7 @@ class Target:
     """Поступательно движущаяся круглая мишень. За попадание дается 1 очко"""
 
     def __init__(self, screen):
+
         self.screen = screen
         self.r = random.randint(10, 100)
         self.color = choice(GAME_COLORS)
@@ -202,11 +203,11 @@ class Target:
         circle(self.screen, self.color, (self.x, self.y), self.r)
 
     def hit(self):
-        """Попадание шарика в цель."""
+        """Попадание шарика в цель (начисление очков)"""
         self.points += 1
 
     def move(self):
-        """движение мишени"""
+        """движение мишени с отражением от всех четырех стен"""
         self.x += self.vx
         self.y += self.vy
 
@@ -266,6 +267,7 @@ class Spinner:
         circle(self.screen, self.color, (self.x, self.y), self.r)
 
     def move(self):
+        """движение минени с отскоком от всех четырех стен"""
         self.X += self.vx
         self.Y += self.vy
 
@@ -282,13 +284,14 @@ class Spinner:
             self.Y = -self.R + floor.height
 
     def hit(self):
-        """Попадание шарика в цель."""
+        """Попадание шарика в цель (начисление очков)"""
         self.points += 3
 
 
 class Text:
 
     def write_points(self):
+        """пишет количество очков"""
         text_p = font.render('Oчки: ' + str(points), False, BLACK)
         screen.blit(text_p, (10, 10))
 
@@ -299,7 +302,7 @@ bullet = 0
 balls = []
 targets = []
 spinners = []
-targets_number = 3
+targets_number = 4
 spinners_number = 1
 points = 0
 
