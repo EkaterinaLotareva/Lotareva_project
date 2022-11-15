@@ -20,7 +20,7 @@ GREY = 0x7D7D7D
 ORANGE = (255, 100, 0)
 GAME_COLORS = [RED, BLUE, YELLOW, GREEN, MAGENTA, CYAN]
 
-WIDTH = 800
+WIDTH = 1200
 HEIGHT = 600
 grav = 3
 
@@ -93,22 +93,13 @@ class Ball:
         )
 
     def hittest(self, obj):
-        """Функция проверяет сталкивалкивается ли данный обьект с целью, описываемой в обьекте obj.
-
-        Args:
-            obj: Обьект, с которым проверяется столкновение.
-        Returns:
-            Возвращает True в случае столкновения мяча и цели. В противном случае возвращает False.
-        """
+        """проверяет столкновение с круглой мишенью"""
         a = obj.x - self.x
         b = obj.y - self.y
-        if ((b**2 + a**2) <= (self.r + target.r)**2) :
+        if ((b**2 + a**2) <= (self.r + obj.r)**2) :
             return True
         else:
             return False
-
-
-
 
 
 class Gun:
@@ -181,12 +172,14 @@ class Gun:
 
 class Target:
 
+    """Поступательно движущаяся круглая мишень. За попадание дается 1 очко"""
+
     def __init__(self, screen):
         self.screen = screen
         self.r = random.randint(10, 100)
         self.color = choice(GAME_COLORS)
-        self.x = random.randint(400, 700)
-        self.y = random.randint(200, 400)
+        self.x = random.randint(self.r, WIDTH - self.r)
+        self.y = random.randint(self.r, HEIGHT - self.r)
         self.vx = random.randint(-5, 5)
         self.vy = random.randint(-5, 5)
         self.live = 1
@@ -194,15 +187,15 @@ class Target:
 
     def new_target(self):
         """инициализирует новую мишень"""
-        global shoots
-        shoots = 0
+
         self.r = random.randint(10, 100)
         self.color = choice(GAME_COLORS)
-        self.x = random.randint(400, 700)
-        self.y = random.randint(200, 400)
-        self.vx = random.randint(-5,5)
-        self.vy = random.randint(-5,5)
+        self.x = random.randint(self.r, WIDTH - self.r)
+        self.y = random.randint(self.r, HEIGHT - self.r)
+        self.vx = random.randint(-5, 5)
+        self.vy = random.randint(-5, 5)
         self.live = 1
+        self.points = 0
 
     def draw(self):
         """рисует мишень"""
@@ -222,11 +215,81 @@ class Target:
         if (self.y - self.r <= 0) or (self.y + self.r >= floor.height):
             self.vy = -self.vy
 
+        if self.y > -self.r + floor.height:
+            self.y = -self.r + floor.height
+
+class Spinner:
+
+    """Вращающаяся мишень. За попадпние дается 3 очка"""
+
+    def __init__ (self, screen):
+
+        self.screen = screen
+        self.R = random.randint(50,100)
+        self.r = random.randint(10, 20)
+        self.X = random.randint(self.R + self.r, WIDTH - (self.r + self.R))
+        self.Y = random.randint(self.R + self.r, HEIGHT - (self.r + self.R))
+        self.vx = random.randint(-10,10)
+        self.vy = random.randint(-10, 10)
+
+        self.alpha = random.random() * 2 * math.pi
+        self.x = self.X + self.R * math.cos(self.alpha)
+        self.y = self.Y + self.R * math.sin(self.alpha)
+        self.v_spin = random.randint(-10, 10) * (math.pi / 180)
+
+        self.color = choice(GAME_COLORS)
+        self.live = 1
+        self.points = 0
+
+    def new_spinner(self):
+        """инициализирует новую мишень"""
+        self.screen = screen
+        self.R = random.randint(50, 100)
+        self.r = random.randint(10, 20)
+        self.X = random.randint(self.R + self.r, WIDTH - (self.r + self.R))
+        self.Y = random.randint(self.R + self.r, HEIGHT - (self.r + self.R))
+        self.vx = random.randint(-10, 10)
+        self.vy = random.randint(-10, 10)
+
+        self.alpha = random.random() * 2 * math.pi
+        self.x = self.X + self.R * math.cos(self.alpha)
+        self.y = self.Y + self.R * math.sin(self.alpha)
+        self.v_spin = random.randint(-10, 10) * (math.pi / 180)
+
+        self.color = choice(GAME_COLORS)
+        self.live = 1
+        self.points = 0
+
+    def draw(self):
+        """рисует мишень"""
+        circle(self.screen, BLACK, (self.X, self.Y), self.R, 4)
+        circle(self.screen, self.color, (self.x, self.y), self.r)
+
+    def move(self):
+        self.X += self.vx
+        self.Y += self.vy
+
+        self.alpha += self.v_spin
+        self.x = self.X + self.R * math.cos(self.alpha)
+        self.y = self.Y + self.R * math.sin(self.alpha)
+
+        if (self.X + self.R + self.r >= WIDTH) or (self.X - self.R - self.r <= 0):
+            self.vx = -self.vx
+        if (self.Y - self.R - self.r <= 0) or (self.Y + self.R + self.r>= floor.height):
+            self.vy = -self.vy
+
+        if self.Y > -self.R + floor.height:
+            self.Y = -self.R + floor.height
+
+    def hit(self):
+        """Попадание шарика в цель."""
+        self.points += 3
+
 
 class Text:
 
     def write_points(self):
-        text_p = font.render('Oчки: ' + str(target.points), False, BLACK)
+        text_p = font.render('Oчки: ' + str(points), False, BLACK)
         screen.blit(text_p, (10, 10))
 
 
@@ -235,7 +298,10 @@ pygame.font.init()
 bullet = 0
 balls = []
 targets = []
+spinners = []
 targets_number = 3
+spinners_number = 1
+points = 0
 
 font = pygame.font.SysFont(None, 40)
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -244,11 +310,16 @@ clock = pygame.time.Clock()
 gun = Gun(screen)
 floor = Floor(screen)
 text = Text()
+spinner = Spinner(screen)
 finished = False
 
 for i in range(targets_number):
     target = Target(screen)
     targets.append(target)
+
+for i in range(spinners_number):
+    spinner = Spinner(screen)
+    spinners.append(spinner)
 
 while not finished:
     screen.fill(WHITE)
@@ -258,11 +329,15 @@ while not finished:
 
     for b in balls:
         b.draw()
-    pygame.display.update()
 
     for t in targets:
-        t.draw()
         t.move()
+        t.draw()
+
+    for s in spinners:
+        s.move()
+        s.draw()
+
     pygame.display.update()
 
     clock.tick(FPS)
@@ -282,7 +357,15 @@ while not finished:
             if b.hittest(t) and t.live:
                 t.live = 0
                 t.hit()
+                points += t.points
                 t.new_target()
+        for s in spinners:
+            if b.hittest(s) and s.live:
+                s.live = 0
+                s.hit()
+                points += s.points
+                s.new_spinner()
+
     gun.power_up()
 
 pygame.quit()
